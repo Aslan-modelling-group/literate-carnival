@@ -4,5 +4,6 @@ out
 dist
 bun.lock
 .env
-.env.example
+.env.*
+!.env.example
 .vercel
