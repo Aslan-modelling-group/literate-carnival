@@ -1,9 +1,9 @@
 /**
- * ASLAN Core — M02 Foundation.
+ * ASLAN Core - M02 Foundation.
  *
  * Core provides domain-neutral contracts and primitives.
  * It does not become the source of truth for business domains.
- * Concrete implementations are owned by M03–M09 and later platform maps.
+ * Concrete implementations are owned by M03-M09 and later platform maps.
  */
 export * from './shared';
 export * from './configuration';
