@@ -9,7 +9,7 @@ export * from './shared';
 export * from './configuration';
 export * from './identity';
 //export * from './authorization';
-export * from './organizations';
+export * from './organization';
 export * from './security';
 export * from './events';
 export * from './audit';
