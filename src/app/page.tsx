@@ -93,16 +93,14 @@ export default async function HomePage() {
 
           {products.length > 0 ? (
             <div className="grid three">
-              {products.map((product: any, index: number) => (
-                <article className="card product-card" key={product.id ?? index}>
+              {products.map((product, index) => (
+                <article className="card product-card" key={product.id}>
                   <span className="number">
                     {String(index + 1).padStart(2, '0')}
                   </span>
 
                   <h3>
-                    {product.name ??
-                      product.title ??
-                      `منتج ASLAN ${index + 1}`}
+                    {product.name || `منتج ASLAN ${index + 1}`}
                   </h3>
 
                   {product.description && (
