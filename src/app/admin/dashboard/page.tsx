@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
+import LogoutButton from '@/components/LogoutButton';
 
 export const dynamic = 'force-dynamic';
 
@@ -32,6 +33,7 @@ export default async function Dashboard() {
       <div className="wrap">
         <span className="kicker">ADMIN CONTROL</span>
         <h1>لوحة إدارة ASLAN</h1>
+        <LogoutButton />
 
         <p className="muted">
           مرحباً {profile.full_name || user.email}
