@@ -2,21 +2,15 @@
 
 import { FormEvent, useState } from 'react';
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 
 export default function LoginPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-
-  const next = (() => {
-    const value = searchParams.get('next');
-    return value && value.startsWith('/') && !value.startsWith('//') ? value : '/';
-  })();
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -24,6 +18,8 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
+      const requestedNext = new URLSearchParams(window.location.search).get('next');
+      const next = requestedNext && requestedNext.startsWith('/') && !requestedNext.startsWith('//') ? requestedNext : '/';
       const supabase = createClient();
       const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
 
