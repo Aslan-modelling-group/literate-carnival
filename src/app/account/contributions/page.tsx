@@ -1,25 +1,22 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
+import ContributionForm from '@/components/ContributionForm';
 
-const contributionTypes = [
-  {
-    title: 'اقتراح',
-    description: 'فكرة لتحسين منتج أو خدمة أو تجربة ASLAN.',
-  },
-  {
-    title: 'تصميم',
-    description: 'تصميم أو تصور يمكن مشاركته مع ASLAN.',
-  },
-  {
-    title: 'نموذج',
-    description: 'نموذج أو ملف أو عمل تريد عرضه للمراجعة.',
-  },
-  {
-    title: 'مشاركة',
-    description: 'محتوى أو تجربة أو معرفة مفيدة لمنظومة ASLAN.',
-  },
-];
+const labels: Record<string, string> = {
+  suggestion: 'اقتراح',
+  design: 'تصميم',
+  model: 'نموذج',
+  post: 'مشاركة',
+};
+
+const statuses: Record<string, string> = {
+  pending: 'قيد المراجعة',
+  needs_revision: 'تحتاج تعديل',
+  accepted: 'مقبولة',
+  published: 'منشورة',
+  rejected: 'مرفوضة',
+};
 
 export default async function ContributionsPage() {
   const supabase = await createClient();
@@ -29,32 +26,44 @@ export default async function ContributionsPage() {
     redirect('/login?next=/account/contributions');
   }
 
+  const { data: contributions } = await supabase
+    .from('contributions')
+    .select('id, type, title, content, status, created_at')
+    .eq('user_id', user.id)
+    .order('created_at', { ascending: false });
+
   return (
     <main className="section" style={{ minHeight: '70vh' }}>
       <div className="wrap">
         <span className="kicker">ASLAN CONTRIBUTIONS</span>
         <h1>مساهماتي</h1>
-        <p className="muted">
-          مساحة مخصصة لكل ما تضيفه إلى منظومة ASLAN.
-        </p>
+        <p className="muted">مساحة مخصصة لكل ما تضيفه إلى منظومة ASLAN.</p>
 
-        <div className="grid three" style={{ marginTop: 28 }}>
-          {contributionTypes.map((item) => (
-            <article className="card" key={item.title}>
-              <h2>{item.title}</h2>
-              <p className="muted">{item.description}</p>
-              <span className="gold">سيتم التفعيل في المرحلة التالية</span>
-            </article>
-          ))}
+        <div style={{ marginTop: 28 }}>
+          <ContributionForm />
         </div>
 
         <div className="card" style={{ marginTop: 28 }}>
           <span className="kicker">سجل المساهمات</span>
-          <h2>لا توجد مساهمات بعد</h2>
-          <p className="muted">
-            عندما يبدأ المستخدم بإرسال مساهمات، ستظهر هنا مع حالتها:
-            قيد المراجعة، تحتاج تعديل، مقبولة أو منشورة.
-          </p>
+          <h2>مساهماتي السابقة</h2>
+
+          {contributions && contributions.length > 0 ? (
+            <div className="grid" style={{ gap: 14 }}>
+              {contributions.map((item) => (
+                <article className="card" key={item.id}>
+                  <span className="kicker">{labels[item.type] || item.type}</span>
+                  <h3>{item.title}</h3>
+                  <p>{item.content}</p>
+                  <p className="muted">
+                    الحالة: {statuses[item.status] || item.status} ·{' '}
+                    {new Date(item.created_at).toLocaleDateString('ar-DZ')}
+                  </p>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <p className="muted">لا توجد مساهمات بعد. أرسل أول مساهمة من النموذج أعلاه.</p>
+          )}
         </div>
 
         <div style={{ marginTop: 24 }}>
