@@ -1,8 +1,8 @@
 'use client';
 
-import { FormEvent, useState } from 'react';
+import { useState } from 'react';
+import type { FormEvent } from 'react';
 import Link from 'next/link';
-import { createClient } from '@/lib/supabase/client';
 
 export default function RegisterPage() {
   const [fullName, setFullName] = useState('');
@@ -31,31 +31,33 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
-      const supabase = createClient();
-      const { data, error: signUpError } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: { full_name: fullName.trim() },
-          emailRedirectTo: `${window.location.origin}/auth/callback?next=/`,
-        },
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fullName: fullName.trim(),
+          email: email.trim(),
+          password,
+        }),
       });
 
-      if (signUpError) {
-        setError(signUpError.message);
+      const result = await response.json();
+
+      if (!response.ok) {
+        setError(result.error || 'تعذر إنشاء الحساب.');
         return;
       }
 
-      if (data.session) {
+      if (result.hasSession) {
         window.location.href = '/';
         return;
       }
 
-      setMessage('تم إنشاء طلب الحساب. تحقق من بريدك الإلكتروني لتأكيد الحساب.');
+      setMessage(result.message);
       setPassword('');
       setConfirmPassword('');
     } catch {
-      setError('تعذر إنشاء الحساب. حاول مرة أخرى.');
+      setError('تعذر الاتصال بخدمة الحسابات. حاول مرة أخرى.');
     } finally {
       setLoading(false);
     }
@@ -118,7 +120,7 @@ export default function RegisterPage() {
         {error && <p style={{ color: '#ef8b8b' }}>{error}</p>}
 
         <p>
-          لديك حساب بالفعل؟ <Link href="/admin/login">تسجيل الدخول</Link>
+          لديك حساب بالفعل؟ <Link href="/login">تسجيل الدخول</Link>
         </p>
       </form>
     </main>
