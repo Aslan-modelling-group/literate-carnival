@@ -4,7 +4,6 @@ import { useState } from 'react';
 import type { FormEvent } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { createClient } from '@/lib/supabase/client';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -20,19 +19,31 @@ export default function LoginPage() {
 
     try {
       const requestedNext = new URLSearchParams(window.location.search).get('next');
-      const next = requestedNext && requestedNext.startsWith('/') && !requestedNext.startsWith('//') ? requestedNext : '/';
-      const supabase = createClient();
-      const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+      const next =
+        requestedNext &&
+        requestedNext.startsWith('/') &&
+        !requestedNext.startsWith('//')
+          ? requestedNext
+          : '/';
 
-      if (signInError) {
-        setError('بيانات الدخول غير صحيحة.');
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim(), password }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        setError(result.error || 'تعذر تسجيل الدخول.');
         return;
       }
 
+      setPassword('');
       router.replace(next);
       router.refresh();
     } catch {
-      setError('تعذر تسجيل الدخول. حاول مرة أخرى.');
+      setError('تعذر الاتصال بخدمة الحسابات. حاول مرة أخرى.');
     } finally {
       setLoading(false);
     }
